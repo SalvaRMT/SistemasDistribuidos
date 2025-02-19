@@ -1,10 +1,12 @@
+using System;
+using System.Threading.Tasks;
+using System.Threading;
 using PokemonApi.Models;
 
-namespace PokemonApi.Repositories
-{
+namespace PokemonApi.Repositories;
+
     public interface IPokemonRepository
     {
-        Task GetPokemonById(Guid id, CancellationToken cancellationToken);
-        Task<Pokemon> GetPokemonByIdAsync(Guid id, CancellationToken cancellationToken);
+        Task<Pokemon> GetByIdAsync(Guid id, CancellationToken cancellationToken);
     }
-}
+
