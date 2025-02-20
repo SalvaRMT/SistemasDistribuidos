@@ -1,4 +1,6 @@
-using PokemonApi.Dtos;
+using System.ServiceModel;
+using PokemonApi.Dto;
+using PokemonApi.Mappers;
 using PokemonApi.Repositories;
 
 namespace PokemonApi.Services;
@@ -7,22 +9,16 @@ public class PokemonService : IPokemonService
 {
     private readonly IPokemonRepository _pokemonRepository;
 
-    //TODO - Unit Test (Test driven development)
-
     public PokemonService(IPokemonRepository pokemonRepository)
     {
         _pokemonRepository = pokemonRepository;
     }
 
-public async Task<PokemonResponseDto> GetPokemonById(Guid id, CancellationToken cancellationToken)
-{
-    var pokemon = await _pokemonRepository.GetPokemonByIdAsync(id, cancellationToken);
-
-    if (pokemon is null)
-    {
-        return null; 
+    public async Task<PokemonResponseDto> GetPokemonById(Guid id, CancellationToken cancellationToken){
+        var pokemon = await _pokemonRepository.GetByIdAsync(id, cancellationToken);
+        if (pokemon is null){
+            throw new FaultException("Pokemon not found:(");
+        }
+        return pokemon.ToDto();
     }
-
-    return new PokemonResponseDto(pokemon.Id, pokemon.Name, pokemon.Type);
 }
-}                       

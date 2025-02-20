@@ -1,5 +1,5 @@
 using Microsoft.EntityFrameworkCore;
-using PokemonApi.Infrastructure.Entities; // Agregar referencia a PokemonEntity
+using PokemonApi.Infrastructure.Entities; 
 namespace PokemonApi.Infrastructure
 {
     public class RelationalDbContext : DbContext
@@ -24,6 +24,7 @@ namespace PokemonApi.Infrastructure
                 entity.Property(s => s.Level).IsRequired();
                 entity.Property(s => s.Attack).IsRequired();
                 entity.Property(s => s.Speed).IsRequired();
+                entity.Property(s => s.weitgh);
             });
         }
     }

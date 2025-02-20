@@ -1,6 +1,6 @@
 using PokemonApi.Infrastructure.Entities;
 using PokemonApi.Models;
-using PokemonApi.Dtos;
+using PokemonApi.Dto;
 
 namespace PokemonApi.Mappers;
 
@@ -21,28 +21,27 @@ public static class PokemonMapper
             Stats = new Stats
             {
                 Attack = entity.Attack,
-                Defense = entity.Desense, // <- Corregido "Desense" -> "Defense"
-                Speed = entity.Speed
+                Defense = entity.Desense, 
+                Speed = entity.Speed,
+                weitgh = entity.weitgh
             }
-        };
-    } // <- Cierre correcto del método ToModel()
 
-    public static PokemonResponseDto ToDto(this Pokemon pokemon)
-    {
-        if (pokemon is null)
+        };
+    } 
+
+    public static PokemonResponseDto ToDto(this Pokemon pokemon){
+    return new PokemonResponseDto{
+        Id = pokemon.Id,
+        Name = pokemon.Name,
+        Level = pokemon.Level,
+        Type = pokemon.Type,
+        Stats = new statsDto
         {
-            return null;
+            Attack = pokemon.Stats.Attack,
+            Defense = pokemon.Stats.Defense,
+            Speed = pokemon.Stats.Speed,
+            weitgh = pokemon.Stats.weitgh
         }
-
-        return new PokemonResponseDto(pokemon.Id, pokemon.Name, pokemon.Type)
-        {
-            Stats = new StatsDto
-            {
-                Attack = pokemon.Stats.Attack,  // <- Ahora está correctamente definido
-                Speed = pokemon.Stats.Speed,    // <- Ahora está correctamente definido
-                Desense = pokemon.Stats.Defense // <- Corregido "Desense" -> "Defense"
-            }
-        };
-    } // <- Cierre correcto del método ToDto()
-
-} // <- Cierre correcto de la clase PokemonMapper
+    };
+}
+}

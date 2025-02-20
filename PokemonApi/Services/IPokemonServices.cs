@@ -1,5 +1,5 @@
 using System.ServiceModel;
-using PokemonApi.Dtos;
+using PokemonApi.Dto;
 
 namespace PokemonApi.Services;
 
