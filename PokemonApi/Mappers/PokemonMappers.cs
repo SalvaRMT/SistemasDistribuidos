@@ -6,6 +6,21 @@ namespace PokemonApi.Mappers;
 
 public static class PokemonMapper
 {
+        public static PokemonEntity ToEntity(this Pokemon pokemon)
+        {
+            return new PokemonEntity
+            {
+                Id = pokemon.Id,
+                Name = pokemon.Name,
+                Level = pokemon.Level,
+                Type = pokemon.Type,
+                Attack = pokemon.Stats.Attack,
+                Desense = pokemon.Stats.Defense,
+                Speed = pokemon.Stats.Speed,
+                weitgh = pokemon.Stats.weitgh
+            };
+
+            }
     public static Pokemon ToModel(this PokemonEntity entity)
     {
         if (entity is null)
@@ -35,7 +50,7 @@ public static class PokemonMapper
         Name = pokemon.Name,
         Level = pokemon.Level,
         Type = pokemon.Type,
-        Stats = new statsDto
+        Stats = new StatsDto
         {
             Attack = pokemon.Stats.Attack,
             Defense = pokemon.Stats.Defense,
