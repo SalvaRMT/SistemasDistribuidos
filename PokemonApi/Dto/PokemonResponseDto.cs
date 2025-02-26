@@ -10,6 +10,6 @@ public class PokemonResponseDto
 
     public int Level{get;set;}
 
-    public statsDto Stats{get;set;}
+    public StatsDto Stats{get;set;}
 
 }
