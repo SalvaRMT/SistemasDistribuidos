@@ -1,4 +1,5 @@
 using System.Runtime.Serialization;
+using PokemonApi.Dto;
 
 namespace PokemonApi.Dto;
 
