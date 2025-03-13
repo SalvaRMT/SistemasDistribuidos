@@ -1,9 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.ServiceModel;
-using PokemonApi.Repositories;
-using PokemonApi.Mappers;
+using System.Threading;
+using System.Threading.Tasks;
 using PokemonApi.Dto;
+using PokemonApi.Mappers;
+using PokemonApi.Models;
+using PokemonApi.Repositories;
 
-namespace PokemonApi.Services;
+namespace PokemonApi.Services
+{
     public class HobbiesService : IHobbiesService
     {
         private readonly IHobbiesRepository _hobbiesRepository;
@@ -43,4 +50,46 @@ namespace PokemonApi.Services;
             }
             return hobbies.Select(h => h.ToDto()).ToList();
         }
+
+        public async Task<HobbiesResponseDto> CreateHobbies(CreateHobbiesDto createHobbiesDto, CancellationToken cancellationToken)
+        {
+            // Validar que el nombre no esté vacío
+            if (string.IsNullOrWhiteSpace(createHobbiesDto.Name))
+            {
+                throw new FaultException("El nombre del hobby es requerido");
+            }
+
+            // Convertir el DTO en el modelo
+            var hobby = new Hobbies
+            {
+                Name = createHobbiesDto.Name,
+                Top = createHobbiesDto.Top
+            };
+
+            await _hobbiesRepository.AddHobbyAsync(hobby, cancellationToken);
+            return hobby.ToDto();
+        }
+
+        public async Task<HobbiesResponseDto> UpdateHobbies(UpdateHobbiesDto updateHobbiesDto, CancellationToken cancellationToken)
+        {
+            var existingHobby = await _hobbiesRepository.GetHobbyById(updateHobbiesDto.Id, cancellationToken);
+            if (existingHobby == null)
+            {
+                throw new FaultException("Hobby not found");
+            }
+
+            // Validar que el nombre no esté vacío
+            if (string.IsNullOrWhiteSpace(updateHobbiesDto.Name))
+            {
+                throw new FaultException("El nombre del hobby es requerido");
+            }
+
+            // Actualizar el modelo
+            existingHobby.Name = updateHobbiesDto.Name;
+            existingHobby.Top = updateHobbiesDto.Top;
+
+            await _hobbiesRepository.UpdateHobbyAsync(existingHobby, cancellationToken);
+            return existingHobby.ToDto();
+        }
     }
+}
