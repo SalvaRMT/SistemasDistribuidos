@@ -1,11 +1,26 @@
 using PokemonApi.Infrastructure.Entities;
 using PokemonApi.Models;
-using PokemonApi.Dtos;
+using PokemonApi.Dto;
 
 namespace PokemonApi.Mappers;
 
 public static class PokemonMapper
 {
+        public static PokemonEntity ToEntity(this Pokemon pokemon)
+        {
+            return new PokemonEntity
+            {
+                Id = pokemon.Id,
+                Name = pokemon.Name,
+                Level = pokemon.Level,
+                Type = pokemon.Type,
+                Attack = pokemon.Stats.Attack,
+                Desense = pokemon.Stats.Defense,
+                Speed = pokemon.Stats.Speed,
+                weitgh = pokemon.Stats.weitgh
+            };
+
+            }
     public static Pokemon ToModel(this PokemonEntity entity)
     {
         if (entity is null)
@@ -21,28 +36,46 @@ public static class PokemonMapper
             Stats = new Stats
             {
                 Attack = entity.Attack,
-                Defense = entity.Desense, // <- Corregido "Desense" -> "Defense"
-                Speed = entity.Speed
+                Defense = entity.Desense, 
+                Speed = entity.Speed,
+                weitgh = entity.weitgh
             }
-        };
-    } // <- Cierre correcto del método ToModel()
 
-    public static PokemonResponseDto ToDto(this Pokemon pokemon)
-    {
-        if (pokemon is null)
+        };
+    } 
+
+    public static PokemonResponseDto ToDto(this Pokemon pokemon){
+    return new PokemonResponseDto{
+        Id = pokemon.Id,
+        Name = pokemon.Name,
+        Level = pokemon.Level,
+        Type = pokemon.Type,
+        Stats = new StatsDto
         {
-            return null;
+            Attack = pokemon.Stats.Attack,
+            Defense = pokemon.Stats.Defense,
+            Speed = pokemon.Stats.Speed,
+            weitgh = pokemon.Stats.weitgh
         }
-
-        return new PokemonResponseDto(pokemon.Id, pokemon.Name, pokemon.Type)
-        {
-            Stats = new StatsDto
-            {
-                Attack = pokemon.Stats.Attack,  // <- Ahora está correctamente definido
-                Speed = pokemon.Stats.Speed,    // <- Ahora está correctamente definido
-                Desense = pokemon.Stats.Defense // <- Corregido "Desense" -> "Defense"
-            }
+    };
+    }
+    public static Pokemon ToModel(this CreatePokemonDto pokemon) {
+        return new Pokemon {
+            Id = Guid.NewGuid(),
+            Name = pokemon.Name,
+            Type = pokemon.Type,
+            Level = pokemon.Level,
+            Stats = pokemon.Stats.ToModel()
         };
-    } // <- Cierre correcto del método ToDto()
+    }
 
-} // <- Cierre correcto de la clase PokemonMapper
+    public static Stats ToModel(this StatsDto stats) {
+        return new Stats {
+            Attack = stats.Attack,
+            Defense = stats.Defense,
+            Speed = stats.Speed,
+            weitgh = stats.weitgh
+        };
+    }
+
+}
