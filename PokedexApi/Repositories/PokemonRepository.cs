@@ -28,6 +28,17 @@ public class PokemonRepository : IPokemonRepository
             return null;
         }
     }
-
-
+public async Task<List<Pokemon>> GetPokemonByNameAsync(string name, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var pokemon = await _pokemonService.GetPokemonByName(name, cancellationToken);
+            return pokemon.ToModelList();
+        }
+        catch(FaultException ex) when (ex.Message == "Pokemon not found :(")
+        {
+            _logger.LogWarning(ex, "Failed to get pokemon with name: {name}", name);
+            return new List<Pokemon>();
+        }
+    }
 }
