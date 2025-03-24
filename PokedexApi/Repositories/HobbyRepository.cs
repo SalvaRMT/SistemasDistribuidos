@@ -15,12 +15,6 @@ namespace PokedexApi.Repositories
             _logger = logger;
 
             var endpointUri = configuration.GetValue<string>("HobbyServiceEndpoint");
-
-            if (!endpointUri.StartsWith("http://"))
-            {
-                endpointUri = "http://" + endpointUri;  
-            }
-
             var endpoint = new EndpointAddress(endpointUri);
             var binding = new BasicHttpBinding();
 

@@ -13,6 +13,7 @@ public class PokemonsController : ControllerBase
         _pokemonService = pokemonService;
     }
     //localhost/api/v1/pokemons/123524-1234
+    //localhost/api/v1/pokemons?name=nombre
     [HttpGet("{id}")]
     public async Task<ActionResult<PokemonResponse>> GetPokemonById(Guid id, CancellationToken cancellationToken)
     {
@@ -31,5 +32,17 @@ public class PokemonsController : ControllerBase
             return NotFound();
         }
         return Ok(pokemon.ToDtoList());
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult> DeletePokemonById(Guid id, CancellationToken cancellationToken)
+    {
+        var delete = await _pokemonService.DeletePokemonByIdAsync(id, cancellationToken);
+        if (delete)
+        {
+            return NoContent();//204
+        }
+        //await _pokemonService.DeletePokemonAsync(id, cancellationToken);
+        return NotFound();//404
     }
 }

@@ -41,4 +41,23 @@ public async Task<List<Pokemon>> GetPokemonByNameAsync(string name, Cancellation
             return new List<Pokemon>();
         }
     }
+    public async Task<bool> DeletePokemonByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _pokemonService.DeletePokemonAsync(id, cancellationToken);
+        return true;
+        }
+          catch (FaultException ex) when (ex.Message == "Pokemon not found :(")
+        {
+        return false;
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Failed to delete pokemon with id: {id}");
+        throw;
+    }
+}
+
+
 }
