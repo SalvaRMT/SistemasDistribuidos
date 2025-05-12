@@ -1,6 +1,6 @@
 namespace PokedexApi.Dtos;
 
-public class HobbyResponse
+public class HobbiesResponse
 {
     public Guid Id {get; set;}
     public string Name {get; set;}
