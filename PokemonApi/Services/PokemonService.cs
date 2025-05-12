@@ -50,7 +50,7 @@ public class PokemonService : IPokemonService
         await _pokemonRepository.AddAsync(pokemonToCreate, cancellationToken);
         return pokemonToCreate.ToDto();}
     
-    public async Task<PokemonResponseDto> UpdatePokemon(UpdatePokemonDto pokemon, CancellationToken cancellationToken)
+    public async Task<PokemonResponseDto> UpdatePokemonAsync(UpdatePokemonDto pokemon, CancellationToken cancellationToken)
     {
         var pokemonToUpdate = await _pokemonRepository.GetByIdAsync(pokemon.Id, cancellationToken);
         if (pokemonToUpdate is null)

@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
 
 namespace PokedexApi.Infrastructure.Soap.Dtos;
-[DataContract(Name = "HobbyResponseDto", Namespace = "http://hobby-api/hobby-service")]
-public class HobbyResponseDto
+[DataContract(Name = "HobbiesResponseDto", Namespace = "http://pokemonapi/hobbies-service")]
+public class HobbiesResponseDto
 {
     [DataMember(Name = "Id", Order = 1)]
     public Guid Id { get; set; }

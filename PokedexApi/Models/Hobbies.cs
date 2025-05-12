@@ -1,6 +1,6 @@
 namespace PokedexApi.Models;
 
-public class Hobby
+public class Hobbies
 {
     public Guid Id {get; set;}
     public required string Name {get; set;}
