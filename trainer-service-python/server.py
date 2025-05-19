@@ -1,97 +1,56 @@
+from concurrent import futures
 import grpc
+import os
+
+from google.protobuf import empty_pb2
 import trainer_pb2
 import trainer_pb2_grpc
-from concurrent import futures
-import time
-import datetime
-import uuid
-from google.protobuf.timestamp_pb2 import Timestamp
 
-class TrainerServiceServicer(trainer_pb2_grpc.TrainerServiceServicer):
-    """Implementación del servicio TrainerService."""
-    
+from repository import TrainerRepository
+
+class TrainerService(trainer_pb2_grpc.TrainerServiceServicer):
+    def __init__(self):
+        self.repo = TrainerRepository()
+
     def GetTrainer(self, request, context):
-        """
-        Implementación del método GetTrainer que retorna un entrenador
-        basado en el ID proporcionado.
-        """
-        print(f"Solicitud recibida para GetTrainer con ID: {request.id}")
-        
-        # Crear timestamp para la fecha de nacimiento y creación
-        birth_timestamp = Timestamp()
-        birth_timestamp.FromDatetime(datetime.datetime.utcnow())
-        
-        created_timestamp = Timestamp()
-        created_timestamp.FromDatetime(datetime.datetime.utcnow())
-        
-        # Crear respuesta con datos estáticos (hardcodeados)
-        response = trainer_pb2.TrainerResponse(
-            id=str(uuid.uuid4()),
-            name="Salvador Rojas",
-            age=21,
-            birthdate=birth_timestamp,
-            created_at=created_timestamp
-        )
-        
-        # Agregar medallas
-        gold_medal = trainer_pb2.Medals(region="MX", type=trainer_pb2.MedalType.GOLD)
-        silver_medal = trainer_pb2.Medals(region="MX", type=trainer_pb2.MedalType.SILVER)
-        response.medals.extend([gold_medal, silver_medal])
-        
-        return response
-    
+        proto = self.repo.get(request.id)
+        if not proto:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Trainer not found")
+        return proto
+
     def GetTrainerByName(self, request, context):
-        """
-        Implementación del método GetTrainerByName que retorna un entrenador
-        basado en el ID proporcionado (aunque debería ser por nombre según la intención).
-        """
-        print(f"Solicitud recibida para GetTrainerByName con ID: {request.id}")
-        
-        # Para mantener la equivalencia con la implementación C#,
-        # usamos la misma lógica que en GetTrainer
-        # En una implementación real, buscaríamos por nombre
-        
-        # Crear timestamp para la fecha de nacimiento y creación
-        birth_timestamp = Timestamp()
-        birth_timestamp.FromDatetime(datetime.datetime.utcnow())
-        
-        created_timestamp = Timestamp()
-        created_timestamp.FromDatetime(datetime.datetime.utcnow())
-        
-        # Crear respuesta con datos estáticos (hardcodeados)
-        response = trainer_pb2.TrainerResponse(
-            id=str(uuid.uuid4()),
-            name="Salvador Rojas",
-            age=21,
-            birthdate=birth_timestamp,
-            created_at=created_timestamp
-        )
-        
-        # Agregar medallas
-        gold_medal = trainer_pb2.Medals(region="MX", type=trainer_pb2.MedalType.GOLD)
-        silver_medal = trainer_pb2.Medals(region="MX", type=trainer_pb2.MedalType.SILVER)
-        response.medals.extend([gold_medal, silver_medal])
-        
-        return response
+        proto = self.repo.get_by_name(request.name)
+        if not proto:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Trainer not found")
+        return proto
+
+    def GetAllTrainers(self, request, context):
+        all_tr = self.repo.get_all()
+        return trainer_pb2.TrainerListResponse(trainers=all_tr)
+
+    def CreateTrainer(self, request, context):
+        return self.repo.create(request)
+
+    def UpdateTrainer(self, request, context):
+        updated = self.repo.update(request.id, request)
+        if not updated:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Trainer not found")
+        return updated
+
+    def DeleteTrainer(self, request, context):
+        ok = self.repo.delete(request.id)
+        if not ok:
+            context.abort(grpc.StatusCode.NOT_FOUND, "Trainer not found")
+        return empty_pb2.Empty()
 
 def serve():
-    """Inicia el servidor gRPC."""
+    port = os.getenv("GRPC_PORT", "50051")
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    trainer_pb2_grpc.add_TrainerServiceServicer_to_server(TrainerServiceServicer(), server)
-    
-    # Escuchar en el puerto 50051
-    server.add_insecure_port('[::]:50051')
+    trainer_pb2_grpc.add_TrainerServiceServicer_to_server(TrainerService(), server)
+    server.add_insecure_port(f"[::]:{port}")
     server.start()
-    
-    print("Servidor gRPC iniciado. Escuchando en el puerto 50051...")
-    
-    try:
-        # Mantener el servidor en ejecución
-        while True:
-            time.sleep(86400)  # Un día en segundos
-    except KeyboardInterrupt:
-        server.stop(0)
-        print("Servidor detenido.")
+    print(f"gRPC server listening on port {port}")
+    server.wait_for_termination()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     serve()
