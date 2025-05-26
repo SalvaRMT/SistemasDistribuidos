@@ -12,42 +12,58 @@ class TrainerRepository:
         client = MongoClient(conn)
         self.collection = client[dbname][coll]
 
-    def _to_proto(self, doc):
-        resp = trainer_pb2.TrainerResponse(
-            id=str(doc["_id"]),
-            name=doc["name"],
-            age=doc["age"]
-        )
+    def _to_timestamp(self, dt):
         ts = Timestamp()
-        ts.FromDatetime(doc["birthdate"])
-        resp.birthdate.CopyFrom(ts)
-        for m in doc.get("medals", []):
-            resp.medals.add(region=m["region"], type=m["type"])
-        return resp
+        ts.FromDatetime(dt)
+        return ts
 
-    def get(self, id_):
-        doc = self.collection.find_one({"_id": ObjectId(id_)})
-        return self._to_proto(doc) if doc else None
-
-    def get_by_name(self, name):
-        doc = self.collection.find_one({"name": name})
-        return self._to_proto(doc) if doc else None
-
-    def get_all(self):
-        return [self._to_proto(d) for d in self.collection.find()]
+    def _to_proto(self, doc):
+        return trainer_pb2.TrainerResponse(
+            id=str(doc.get("_id")),
+            name=doc.get("name", ""),
+            age=doc.get("age", 0),
+            birthdate=self._to_timestamp(doc.get("birthdate")),
+            medals=[
+                trainer_pb2.Medals(region=m["region"], type=m["type"])
+                for m in doc.get("medals", [])
+            ]
+        )
 
     def create(self, proto_req):
-        new = {
+        """Inserta un nuevo Trainer y devuelve el proto."""
+        doc = {
             "name": proto_req.name,
             "age": proto_req.age,
             "birthdate": proto_req.birthdate.ToDatetime(),
             "medals": [{"region": m.region, "type": m.type} for m in proto_req.medals],
         }
-        result = self.collection.insert_one(new)
-        new["_id"] = result.inserted_id
-        return self._to_proto(new)
+        result = self.collection.insert_one(doc)
+        # Inyectamos el _id para convertirlo a proto
+        doc["_id"] = result.inserted_id
+        return self._to_proto(doc)
+
+    def get(self, id_):
+        """Busca un Trainer por su ObjectId."""
+        doc = self.collection.find_one({"_id": ObjectId(id_)})
+        if not doc:
+            return None
+        return self._to_proto(doc)
+
+    def get_by_name(self, name):
+        """Busca un Trainer por nombre (case-insensitive, coincidente exacto)."""
+        doc = self.collection.find_one({
+            "name": {"$regex": f"^{name}$", "$options": "i"}
+        })
+        if not doc:
+            return None
+        return self._to_proto(doc)
+
+    def get_all(self):
+        """Devuelve todos los Trainers como lista de protos."""
+        return [self._to_proto(doc) for doc in self.collection.find()]
 
     def update(self, id_, proto_req):
+        """Reemplaza el Trainer con los datos del proto y devuelve el proto actualizado."""
         updated = {
             "name": proto_req.name,
             "age": proto_req.age,
@@ -61,5 +77,6 @@ class TrainerRepository:
         return self._to_proto(updated)
 
     def delete(self, id_):
+        """Borra el Trainer y devuelve True si existía."""
         result = self.collection.delete_one({"_id": ObjectId(id_)})
         return result.deleted_count > 0

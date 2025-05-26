@@ -25,8 +25,8 @@ class TrainerService(trainer_pb2_grpc.TrainerServiceServicer):
         return proto
 
     def GetAllTrainers(self, request, context):
-        all_tr = self.repo.get_all()
-        return trainer_pb2.TrainerListResponse(trainers=all_tr)
+        all_trs = self.repo.get_all()
+        return trainer_pb2.TrainerListResponse(trainers=all_trs)
 
     def CreateTrainer(self, request, context):
         return self.repo.create(request)
