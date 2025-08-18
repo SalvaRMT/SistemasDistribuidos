@@ -1,0 +1,61 @@
+syntax = "proto3";
+package trainer;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+service TrainerService {
+  rpc GetTrainer       (TrainerByIdRequest)       returns (TrainerResponse);
+  rpc GetTrainerByName (TrainerByNameRequest)     returns (TrainerResponse);
+  rpc GetAllTrainers   (google.protobuf.Empty)    returns (TrainerListResponse);
+  rpc CreateTrainer    (CreateTrainerRequest)     returns (TrainerResponse);
+  rpc UpdateTrainer    (UpdateTrainerRequest)     returns (TrainerResponse);
+  rpc DeleteTrainer    (TrainerByIdRequest)       returns (google.protobuf.Empty);
+}
+
+message TrainerByIdRequest {
+  string id = 1;
+}
+
+message TrainerByNameRequest {
+  string name = 1;
+}
+
+message CreateTrainerRequest {
+  string name   = 1;
+  int32 age     = 2;
+  google.protobuf.Timestamp birthdate = 3;
+  repeated Medals medals = 4;
+}
+
+message UpdateTrainerRequest {
+  string id     = 1;
+  string name   = 2;
+  int32 age     = 3;
+  google.protobuf.Timestamp birthdate = 4;
+  repeated Medals medals = 5;
+}
+
+message TrainerResponse {
+  string id     = 1;
+  string name   = 2;
+  int32 age     = 3;
+  google.protobuf.Timestamp birthdate = 4;
+  repeated Medals medals = 5;
+}
+
+message Medals {
+  string region = 1;
+  MedalType type = 2;
+}
+
+enum MedalType {
+  BRONZE   = 0;
+  GOLD     = 1;
+  SILVER   = 2;
+  PLATINUM = 3;
+}
+
+message TrainerListResponse {
+  repeated TrainerResponse trainers = 1;
+}
